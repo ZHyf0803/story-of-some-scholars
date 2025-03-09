@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>儒林外史人物图鉴</title>
+    <style>
+        :root {
+            --primary-color: #8B4513;
+            --secondary-color: #F5DEB3;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', '宋体', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0)),
+                        url('bg.jpg') center/cover fixed;
+            min-height: 100vh;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        body.loaded {
+            opacity: 1;
+        }
+
+        /* 导航按钮样式 */
+        .nav-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: rgba(128, 128, 128, 0.7);
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .nav-button:hover {
+            background: rgba(128, 128, 128, 0.9);
+            transform: scale(1.1);
+        }
+
+        /* 工具提示 */
+        .nav-button::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            top: 50%;
+            right: 55px;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .nav-button:hover::after {
+            opacity: 1;
+            visibility: visible;
+        }
+
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .characters-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* 默认3列 */
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .character-card {
+            position: relative;
+            cursor: pointer;
+            transition: transform 1s ease, opacity 1s ease;
+            perspective: 1000px;
+        }
+
+        .character-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .character-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .character-info {
+            position: absolute;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            width: 100%;
+            padding: 0.5rem;
+            text-align: center;
+            border-radius: 0 0 8px 8px;
+        }
+
+        .detail-panel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(245, 222, 179, 0.95);
+            padding: 2rem;
+            border-radius: 12px;
+            max-width: 600px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+        }
+
+        .detail-panel.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .search-box {
+            max-width: 500px;
+            margin: 0 auto 2rem;
+            position: relative;
+        }
+
+        #searchInput {
+            width: 100%;
+            padding: 12px 20px;
+            border: 2px solid var(--primary-color);
+            border-radius: 30px;
+            background: rgba(245, 222, 179, 0.9);
+            font-size: 16px;
+            color: var(--primary-color);
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        #searchInput:focus {
+            box-shadow: 0 0 10px rgba(139, 69, 19, 0.3);
+        }
+
+        body.fade-out * {
+            opacity: 0 !important;
+            transform: translateY(20px) !important;
+            transition: all 0.5s ease !important;
+        }
+
+        @media (max-width: 768px) {
+            .characters-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .character-img {
+                height: 150px;
+            }
+        }
+
+        @media (max-width: 992px) {
+    .characters-grid {
+        grid-template-columns: repeat(2, 1fr); /* 中屏2列 */
+        }
+        }
+
+        @media (max-width: 576px) {
+            .characters-grid {
+                grid-template-columns: 1fr; /* 小屏1列 */
+            }
+        }
+
+        @media (max-width: 576px) {
+            #searchInput {
+                font-size: 14px;
+                padding: 10px 15px;
+            }
+            
+            .search-box {
+                margin-bottom: 1.5rem;
+                padding: 0 1rem;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1 style="color: var(--secondary-color); text-align: center; margin-bottom: 1rem;">儒林外史人物图鉴</h1>
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="输入人物名称或章回进行搜索...">
+        </div>
+        <!-- 原有内容保持不变 -->
+    </div>
+
+    <div class="container">
+        
+        <div class="characters-grid">
+            <!-- 人物数据 -->
+
+            <div class="character-card" data-chapter="1" data-details="作为书中契子，起到开头作用。">
+                <img src="placeholder.jpg" alt="王冕" class="character-img" data-src=".\png\wangmian.jpg">
+                <div class="character-info">
+                    <h3>王冕</h3>
+                    <p>第一回</p>
+                </div>
+            </div>
+
+            <div class="character-card" data-chapter="2" data-details="周进，书中的第二个人物。为下文的范进的经历埋下伏笔。">
+                <img src="placeholder.jpg" alt="周进" class="character-img" data-src=".\png\zhoujin.jpg">
+                <div class="character-info">
+                    <h3>周进</h3>
+                    <p>第二回</p>
+                </div>
+            </div>
+
+            <div class="character-card" data-chapter="3" data-details="范进，字退之...">
+                <img src="placeholder.jpg" alt="范进" class="character-img" data-src=".\png\fanjin.jpg">
+                <div class="character-info">
+                    <h3>范进</h3>
+                    <p>第三回</p>
+                </div>
+            </div>
+            
+
+            <!-- 更多人物按相同结构添加 -->
+        </div>
+
+        <div class="nav-button" data-tooltip="返回目录">
+            <span>→</span>
+        </div>
+    </div>
+
+    <div class="detail-panel">
+        <button onclick="closeDetail()" style="float: right; background: none; border: none; cursor: pointer;">×</button>
+        <h2 class="detail-name"></h2>
+        <p class="detail-chapter"></p>
+        <p class="detail-content"></p>
+    </div>
+
+    <script>
+
+        window.addEventListener('DOMContentLoaded', () => {
+            document.body.classList.add('loaded');
+        });
+
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const cards = document.querySelectorAll('.character-card');
+            
+            cards.forEach(card => {
+                const name = card.querySelector('h3').textContent.toLowerCase();
+                const chapter = card.querySelector('p').textContent.toLowerCase();
+                const match = name.includes(searchTerm) || chapter.includes(searchTerm);
+                
+                card.style.display = match ? 'block' : 'none';
+            });
+        });
+
+        document.querySelectorAll('.character-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const panel = document.querySelector('.detail-panel');
+                panel.querySelector('.detail-name').textContent = card.querySelector('h3').textContent;
+                panel.querySelector('.detail-chapter').textContent = `出自第${card.dataset.chapter}回`;
+                panel.querySelector('.detail-content').textContent = card.dataset.details;
+                panel.classList.add('active');
+            });
+        });
+
+        function closeDetail() {
+            document.querySelector('.detail-panel').classList.remove('active');
+        }
+
+        // 图片懒加载
+        const lazyLoad = target => {
+            const io = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && entry.target.style.display !== 'none') {
+                        const img = entry.target;
+                        img.src = img.dataset.src;
+                        observer.unobserve(img);
+                    }
+                });
+            });
+            io.observe(target);
+        };
+
+        document.querySelectorAll('[data-src]').forEach(lazyLoad);
+
+        // 导航按钮功能
+        document.querySelector('.nav-button').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.body.classList.add('fade-out');
+            setTimeout(() => window.location.href = 'catalog.html', 500);
+        });
+        
+        //再也不敢动了
+        // const originalTransition = document.body.style.transition;
+        // document.body.classList.add('fade-out').style.transition = originalTransition;
+        // document.body.classList.remove('fade-out');
+
+    </script>
+</body>
+</html>
